@@ -1,0 +1,2 @@
+Implement camera with the strategy pattern
+	- https://chat.openai.com/c/880b038f-4e10-4db7-86f0-aa58b72b9ac1
