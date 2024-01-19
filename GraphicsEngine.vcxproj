@@ -141,8 +141,8 @@
     <ClCompile Include="Source\Core\Input.cpp" />
     <ClCompile Include="Source\Core\Renderer.cpp" />
     <ClCompile Include="Source\Core\Simulation.cpp" />
+    <ClCompile Include="Source\Core\World.cpp" />
     <ClCompile Include="Source\Events\EventDispatcher.cpp" />
-    <ClCompile Include="Source\Core\Scene.cpp" />
     <ClCompile Include="Source\Graphics\Mesh.cpp" />
     <ClCompile Include="Source\Graphics\ShaderProgram.cpp" />
   </ItemGroup>
@@ -150,15 +150,16 @@
     <ClInclude Include="Source\Core\Components.h" />
     <ClInclude Include="Source\Core\Game.h" />
     <ClInclude Include="Source\Core\Input.h" />
+    <ClInclude Include="Source\Core\ISystem.h" />
+    <ClInclude Include="Source\Core\RenderSystem.h" />
     <ClInclude Include="Source\Core\Simulation.h" />
+    <ClInclude Include="Source\Core\World.h" />
     <ClInclude Include="Source\Events\ApplicationEvent.h" />
     <ClInclude Include="Source\Events\Event.h" />
     <ClInclude Include="Source\Events\EventDispatcher.h" />
     <ClInclude Include="Source\Events\IEventHandler.h" />
     <ClInclude Include="Source\Events\KeyboardEvent.h" />
     <ClInclude Include="Source\Events\MouseEvent.h" />
-    <ClInclude Include="Source\Core\GameObject.h" />
-    <ClInclude Include="Source\Core\Scene.h" />
     <ClInclude Include="Source\Graphics\Mesh.h" />
     <ClInclude Include="Source\Core\Renderer.h" />
     <ClInclude Include="Source\Graphics\ShaderProgram.h" />

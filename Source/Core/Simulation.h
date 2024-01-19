@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Renderer.h"
-#include "Scene.h"
+struct Scene;
 
 class Simulation {
 public:
-	Simulation() = default;
+	Simulation(Scene& scene);
 	void Update(float timestep);
 };

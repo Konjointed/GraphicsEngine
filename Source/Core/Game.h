@@ -8,14 +8,17 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
-#include "GameObject.h"
 #include "../Graphics/Mesh.h"
+#include "../Graphics/ShaderProgram.h"
 
 class EventDispatcher;
 class Input;
 class Renderer;
 class Simulation;
-class Scene;
+
+struct Scene {
+	ShaderProgram shaderProgram;
+};
 
 struct Resources {
 	std::map<std::string, Mesh> meshes;
@@ -51,7 +54,7 @@ private:
 	Input* input = nullptr;
 	Renderer* renderer = nullptr;
 	Simulation* simulation = nullptr;
-	Scene* scene = nullptr;
 
 	Resources resources;
+	Scene scene;
 };

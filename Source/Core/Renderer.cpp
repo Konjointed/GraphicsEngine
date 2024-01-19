@@ -9,9 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Game.h"
-#include "Scene.h"
-#include "Components.h"
-#include "GameObject.h"
 
 void Renderer::Draw(const Scene& scene, const Resources& resources)
 {
@@ -69,14 +66,6 @@ void Renderer::Draw(const Scene& scene, const Resources& resources)
 
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (const auto& object : scene.objects) {
-		if (object.hasComponent<MeshComponent>()) {
-			auto meshName = object.getComponent<MeshComponent>()->meshName;
-			const Mesh& mesh = resources.meshes.at(meshName);
-			BindMesh(mesh);
-		} 
-	}	
 }
 
 void Renderer::BindMesh(const Mesh& mesh)

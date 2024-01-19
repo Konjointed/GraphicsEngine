@@ -1,6 +1,6 @@
 #pragma once
 
-class Scene;
+struct Scene;
 struct Resources;
 struct Mesh;
 

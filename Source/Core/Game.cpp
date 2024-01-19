@@ -10,14 +10,11 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Simulation.h"
-#include "Scene.h"
 
 int Game::Run(const char* title, int width, int height, bool fullscreen)
 {
 	if (!Init(title, width, height, fullscreen))
 		return -1;
-
-	CreateScene(*scene);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -47,7 +44,8 @@ int Game::Run(const char* title, int width, int height, bool fullscreen)
 		//	totalTime = 0.0f;
 		//}	
 
-		renderer->Draw(*scene, resources);
+		renderer->Draw(scene, resources);
+		simulation->Update(timestep);
 		input->EndFrame();
 
 		SDL_GL_SwapWindow(window);
@@ -185,8 +183,7 @@ void Game::LoadSubsystems()
 	dispatcher = new EventDispatcher();
 	input = new Input(*dispatcher);
 	renderer = new Renderer();
-	scene = new Scene();
-	simulation = new Simulation();
+	simulation = new Simulation(scene);
 }
 
 void Game::LoadResources(Resources& resources)
