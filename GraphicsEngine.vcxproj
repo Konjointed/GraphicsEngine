@@ -140,6 +140,7 @@
     <ClCompile Include="Source\Core\Game.cpp" />
     <ClCompile Include="Source\Core\Input.cpp" />
     <ClCompile Include="Source\Core\Renderer.cpp" />
+    <ClCompile Include="Source\Core\RenderSystem.cpp" />
     <ClCompile Include="Source\Core\Simulation.cpp" />
     <ClCompile Include="Source\Core\World.cpp" />
     <ClCompile Include="Source\Events\EventDispatcher.cpp" />
@@ -148,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Core\Components.h" />
+    <ClInclude Include="Source\Core\Entity.h" />
     <ClInclude Include="Source\Core\Game.h" />
     <ClInclude Include="Source\Core\Input.h" />
     <ClInclude Include="Source\Core\ISystem.h" />

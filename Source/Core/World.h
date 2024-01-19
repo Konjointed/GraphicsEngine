@@ -1,80 +1,106 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
+#include "ISystem.h"
 #include "Components.h"
+#include "Entity.h"
 
-struct {
-	std::vector<TagComponent> tags;
-	std::vector<TransformComponent> transforms;
-	std::vector<MeshComponent> meshes;
-} g_components;
+#include "RenderSystem.h"
 
-int nextEntityId = 0;
-
-template <typename T>
-void addComponent(int entity, T component) {
-	if (entity < 0 || entity >= g_components.tags.size()) {
-		throw std::runtime_error("Invalid entity ID");
-	}
-
-	if (hasComponent<T>(entity)) {
-		throw std::runtime_error("Entity already has a component of the specified type");
-	}
-
-	if (std::is_same<T, TagComponent>::value) {
-		g_components.tags.push_back(component);
-	}
-	else if (std::is_same<T, TransformComponent>::value) {
-		g_components.transforms.push_back(component);
-	}
-	else if (std::is_same<T, MeshComponent>::value) {
-		g_components.meshes.push_back(component);
-	}
-	else {
-		throw std::runtime_error("Unsupported component type");
-	}
+// According to ChatGPT: "Ensures that entities can quickly and uniquely identified when uses as keys in has-based containers"
+namespace std {
+	template <>
+	struct hash<Entity> {
+		size_t operator()(const Entity& entity) const {
+			return hash<unsigned>()(entity.id);
+		}
+	};
 }
 
-template <typename T>
-bool hasComponent(int entity) {
-	if (entity < 0 || entity >= g_components.tags.size()) {
-		throw std::runtime_error("Invalid entity ID");
+class ECS {
+public:
+	template <typename SystemType, typename... Args>
+	void registerSystem(Args&&... args) {
+		SystemType* system = new SystemType(std::forward<Args>(args)...);
+		systems.push_back(system);
 	}
 
-	if (std::is_same<T, TagComponent>::value) {
-		return g_components.tags[entity] == entity;
-	}
-	else if (std::is_same<T, TransformComponent>::value) {
-		return g_components.transforms[entity] == entity;
-	}
-	else if (std::is_same<T, MeshComponent>::value) {
-		return g_components.meshes[entity] == entity;
-	}
-	else {
-		throw std::runtime_error("Invalid component type");
-	}
-}
+	template <typename T>
+	bool hasComponent(Entity entity) {
+		if constexpr (std::is_same<T, TagComponent>::value) {
+			return tagComponents.find(entity) != tagComponents.end();
+		}
+		else if constexpr (std::is_same<T, TransformComponent>::value) {
+			return transformComponents.find(entity) != transformComponents.end();
+		}
+		else if constexpr (std::is_same<T, MeshComponent>::value) {
+			return meshComponents.find(entity) != meshComponents.end();
+		}
 
-template <typename... ComponentTypes>
-std::vector<int> queryEntitiesWith() {
-	std::vector<int> matchingEntities;
+		return false;
+	}
 
-	// Iterate through all entities
-	for (int entity = 0; entity < g_components.tags.size(); entity++) {
-		// Check if the entity has all required components
-		if (hasAllComponents<ComponentTypes...>(entity)) {
-			matchingEntities.push_back(entity);
+	template <typename T>
+	void addComponent(Entity entity, T component) {
+		if constexpr (std::is_same<T, TagComponent>::value) {
+			tagComponents[entity] = component;
+		}
+		else if constexpr (std::is_same<T, TransformComponent>::value) {
+			transformComponents[entity] = component;
+		}
+		else if constexpr (std::is_same<T, MeshComponent>::value) {
+			meshComponents[entity] = component;
 		}
 	}
 
-	return matchingEntities;
-}
+	template <typename T>
+	T& getComponent(Entity entity) {
+		if constexpr (std::is_same<T, TagComponent>::value) {
+			return tagComponents.at(entity);
+		}
+		else if constexpr (std::is_same<T, TransformComponent>::value) {
+			return transformComponents.at(entity);
+		}
+		else if constexpr (std::is_same<T, MeshComponent>::value) {
+			return meshComponents.at(entity);
+		}
+		//else {
+		//	static_assert(dependent_false_v<T>, "Component type not recognized");
+		//}
+	}
 
-template <typename... ComponentTypes>
-bool hasAllComponents(int entity) {
-	return (hasComponent<ComponentTypes>(entity) && ...);
-}
+	template <typename... ComponentTypes>
+	std::vector<Entity> queryEntitiesWith() {
+		std::vector<Entity> matchingEntities;
 
-int createEntity(const std::string& name);
-void destroyEntity(int entity);
+		for (const auto& entity : entities) {
+			if ((hasComponent<ComponentTypes>(entity) && ...)) {
+				matchingEntities.push_back(entity);
+			}
+		}
+
+		return matchingEntities;
+	}
+
+	void update(float timestep);
+
+	Entity createEntity(const std::string& name);
+	void destroyEntity(Entity entity);
+	bool alive(Entity entity);
+private:
+	template <typename... ComponentTypes>
+	bool hasComponents(Entity entity) {
+		return (hasComponent<ComponentTypes>(entity) && ...);
+	}
+private:
+	int nextEntityId = 0;
+
+	std::vector<ISystem*> systems;
+	std::unordered_set<Entity> entities;
+	std::unordered_map<Entity, TagComponent> tagComponents;
+	std::unordered_map<Entity, TransformComponent> transformComponents;
+	std::unordered_map<Entity, MeshComponent> meshComponents;
+};

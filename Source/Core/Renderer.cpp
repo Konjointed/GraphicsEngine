@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Game.h"
+#include "Components.h"
 
 void Renderer::Draw(const Scene& scene, const Resources& resources)
 {
@@ -66,6 +67,18 @@ void Renderer::Draw(const Scene& scene, const Resources& resources)
 
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	for (const MeshComponent& mesh : meshes) {
+		std::cout << mesh.meshName << "\n";
+		BindMesh(resources.meshes.at(mesh.meshName));
+	}
+
+	meshes.clear();
+}
+
+void Renderer::SubmitMesh(const MeshComponent& mesh)
+{
+	meshes.push_back(mesh);
 }
 
 void Renderer::BindMesh(const Mesh& mesh)

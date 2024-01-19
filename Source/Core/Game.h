@@ -11,6 +11,8 @@
 #include "../Graphics/Mesh.h"
 #include "../Graphics/ShaderProgram.h"
 
+#include "World.h"
+
 class EventDispatcher;
 class Input;
 class Renderer;
@@ -43,8 +45,9 @@ private:
 	void SDL2ProcessEvent(SDL_Event& event);
 private:
 	bool LoadSDL(const char* title, int width, int height, bool fullscreen);
-	void LoadSubsystems();
 	void LoadResources(Resources& resources);
+	void LoadSubsystems();
+	void LoadECSSystems();
 private:
 	bool quit = false;
 	SDL_Window* window = nullptr;
@@ -54,6 +57,8 @@ private:
 	Input* input = nullptr;
 	Renderer* renderer = nullptr;
 	Simulation* simulation = nullptr;
+
+	ECS ecs;
 
 	Resources resources;
 	Scene scene;

@@ -4,13 +4,13 @@
 
 #include <iostream>
 
-#include "World.h"
+class ECS;
+class Renderer;
 
 class RenderSystem : public ISystem {
 public:
-	void update(float timestep) override {
-		for (int entity : queryEntitiesWith<MeshComponent, TransformComponent>()) {
-			std::cout << "RenderSystem: " << entity << std::endl;
-		}
-	}
+	RenderSystem(Renderer& renderer) : renderer(renderer) {}
+	void update(ECS& ecs, float timestep) override;
+private:
+	Renderer& renderer;
 };

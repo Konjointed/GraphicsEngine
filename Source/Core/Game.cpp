@@ -11,6 +11,8 @@
 #include "Renderer.h"
 #include "Simulation.h"
 
+class RenderSystem;
+
 int Game::Run(const char* title, int width, int height, bool fullscreen)
 {
 	if (!Init(title, width, height, fullscreen))
@@ -44,6 +46,7 @@ int Game::Run(const char* title, int width, int height, bool fullscreen)
 		//	totalTime = 0.0f;
 		//}	
 
+		ecs.update(timestep);
 		renderer->Draw(scene, resources);
 		simulation->Update(timestep);
 		input->EndFrame();
@@ -62,8 +65,9 @@ bool Game::Init(const char* title, int width, int height, bool fullscreen)
 		return false;
 	}
 
-	LoadSubsystems();
 	LoadResources(resources);
+	LoadSubsystems();
+	LoadECSSystems(); // TODO: Consider moving this somewhere else?
 
 	return true;
 }
@@ -183,7 +187,12 @@ void Game::LoadSubsystems()
 	dispatcher = new EventDispatcher();
 	input = new Input(*dispatcher);
 	renderer = new Renderer();
-	simulation = new Simulation(scene);
+	simulation = new Simulation(scene, ecs);
+}
+
+void Game::LoadECSSystems()
+{
+	ecs.registerSystem<RenderSystem>(*renderer);
 }
 
 void Game::LoadResources(Resources& resources)
