@@ -1,15 +1,13 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-
 class Scene;
+struct Resources;
 struct Mesh;
 
 class Renderer {
 public:
-	void Draw(SDL_Window* window, Scene& scene);
+	Renderer() = default;
+	void Draw(const Scene& scene, const Resources& resources);
 private:
 	void BindMesh(const Mesh& mesh);
 };

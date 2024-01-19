@@ -6,8 +6,8 @@
 
 void ShaderProgram::AddShaders(GLenum type, std::string name)
 {
-    Shader compiledShader = CompileShader(type, name);
-    shaders.push_back(compiledShader);
+	Shader compiledShader = CompileShader(type, name);
+	shaders.push_back(compiledShader);
 }
 
 void ShaderProgram::Link()

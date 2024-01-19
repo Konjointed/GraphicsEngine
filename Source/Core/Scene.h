@@ -3,17 +3,20 @@
 #include <string>
 #include <vector>
 
-#include "../Graphics/Mesh.h"
 #include "../Graphics/ShaderProgram.h"
-#include "Camera.h"
+
+class GameObject;
 
 class Scene {
 public:
-	std::vector<Mesh> meshes;
-	
-	Camera camera;
+	std::vector<GameObject> objects;
 	ShaderProgram shaderProgram;
+
+	Scene() = default;
+
+	GameObject& CreateGameObject(const std::string& name);
+
+	void DestroyGameObject(GameObject object);
 };
 
-void InitScene(Scene& scene);
-void LoadMesh(const std::string& filepath, Scene& scene);
+void CreateScene(Scene& scene);

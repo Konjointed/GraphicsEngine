@@ -7,14 +7,19 @@
 #include "../Events/MouseEvent.h"
 #include "../Events/ApplicationEvent.h"
 
-#include "Scene.h"
-#include "Renderer.h"
 #include "Input.h"
+#include "Renderer.h"
+#include "Simulation.h"
+#include "Scene.h"
 
 int Game::Run(const char* title, int width, int height, bool fullscreen)
 {
 	if (!Init(title, width, height, fullscreen))
 		return -1;
+
+	CreateScene(*scene);
+
+	glEnable(GL_DEPTH_TEST);
 
 	while (!quit) {
 		SDL_Event event;
@@ -42,9 +47,10 @@ int Game::Run(const char* title, int width, int height, bool fullscreen)
 		//	totalTime = 0.0f;
 		//}	
 
-		Update(timestep);
-		Render();
+		renderer->Draw(*scene, resources);
 		input->EndFrame();
+
+		SDL_GL_SwapWindow(window);
 	}
 
 	Shutdown();
@@ -54,60 +60,12 @@ int Game::Run(const char* title, int width, int height, bool fullscreen)
 
 bool Game::Init(const char* title, int width, int height, bool fullscreen)
 {
-	//-----------------------------------------------------------------------------
-	// Initialzie SDL
-	//-----------------------------------------------------------------------------
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		std::cout << "SDL error on initialization: " << SDL_GetError() << "\n";
+	if (!LoadSDL(title, width, height, fullscreen)) {
 		return false;
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	//-----------------------------------------------------------------------------
-	// Create sdl window
-	//-----------------------------------------------------------------------------
-	const Uint32 windowFlags = (SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_RESIZABLE : 0));
-	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, windowFlags);
-	if (!window) {
-		std::cout << "SDL error on create window: " << SDL_GetError() << "\n";
-		return false;
-	}
-	//-----------------------------------------------------------------------------
-	// Create opengl context
-	//-----------------------------------------------------------------------------
-	glContext = SDL_GL_CreateContext(window);
-	if (!glContext) {
-		std::cout << "SDL GL error on create context: " << SDL_GetError() << "\n";
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-		return false;
-	}
-	//-----------------------------------------------------------------------------
-	// Load opengl functions and pointers
-	//-----------------------------------------------------------------------------
-	if (!gladLoadGL()) {
-		std::cout << "GLAD Initialization Error\n";
-		SDL_GL_DeleteContext(glContext);
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-		return false;
-	}
-	//-----------------------------------------------------------------------------
-	// Create subsystems
-	//-----------------------------------------------------------------------------
-	dispatcher = new EventDispatcher();
-
-	scene = new Scene();
-	renderer = new Renderer();
-	input = new Input(*dispatcher);
-
-	// TODO: Move this to a scene loader?
-	InitScene(*scene);
-	LoadMesh("Resources/Meshes/cube.obj", *scene);
-
-	glEnable(GL_DEPTH_TEST);
+	LoadSubsystems();
+	LoadResources(resources);
 
 	return true;
 }
@@ -119,23 +77,8 @@ void Game::Shutdown()
 	SDL_Quit();
 
 	delete dispatcher;
-	delete scene;
-	delete renderer;
 	delete input;
-}
-
-void Game::Update(float timestep)
-{
-	scene->camera.Update(timestep, *input);
-
-	if (input->IsKeyDown(SDLK_ESCAPE)) {
-		quit = true;
-	}
-}
-
-void Game::Render()
-{
-	renderer->Draw(window, *scene);
+	delete renderer;
 }
 
 void Game::SDL2ProcessEvent(SDL_Event& event)
@@ -189,4 +132,67 @@ void Game::SDL2ProcessEvent(SDL_Event& event)
 	}
 		break;
 	}
+}
+
+bool Game::LoadSDL(const char* title, int width, int height, bool fullscreen)
+{
+	//-----------------------------------------------------------------------------
+	// Initialzie SDL
+	//-----------------------------------------------------------------------------
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+		std::cout << "SDL error on initialization: " << SDL_GetError() << "\n";
+		return false;
+	}
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	//-----------------------------------------------------------------------------
+	// Create sdl window
+	//-----------------------------------------------------------------------------
+	const Uint32 windowFlags = (SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_RESIZABLE : 0));
+	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, windowFlags);
+	if (!window) {
+		std::cout << "SDL error on create window: " << SDL_GetError() << "\n";
+		return false;
+	}
+	//-----------------------------------------------------------------------------
+	// Create opengl context
+	//-----------------------------------------------------------------------------
+	glContext = SDL_GL_CreateContext(window);
+	if (!glContext) {
+		std::cout << "SDL GL error on create context: " << SDL_GetError() << "\n";
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		return false;
+	}
+	//-----------------------------------------------------------------------------
+	// Load opengl functions and pointers
+	//-----------------------------------------------------------------------------
+	if (!gladLoadGL()) {
+		std::cout << "GLAD Initialization Error\n";
+		SDL_GL_DeleteContext(glContext);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		return false;
+	}
+
+	return true;
+}
+
+void Game::LoadSubsystems()
+{
+	dispatcher = new EventDispatcher();
+	input = new Input(*dispatcher);
+	renderer = new Renderer();
+	scene = new Scene();
+	simulation = new Simulation();
+}
+
+void Game::LoadResources(Resources& resources)
+{
+	resources.window = window;
+
+	LoadMesh(resources, "Resources/Meshes/suzanne.obj", "suzanne");
+	LoadMesh(resources, "Resources/Meshes/cube.obj", "cube");
 }

@@ -2,19 +2,22 @@
 
 #include <iostream>
 
+#include <glad/glad.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Game.h"
 #include "Scene.h"
+#include "Components.h"
+#include "GameObject.h"
 
-void Renderer::Draw(SDL_Window* window, Scene& scene)
+void Renderer::Draw(const Scene& scene, const Resources& resources)
 {
 	glm::mat4 model = glm::mat4(1.0f);
-	//glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 500.0f);
-	//glm::mat4 view = glm::mat4(1.0f);
-	glm::mat4 projection = ComputeProjectionMatrix(scene.camera);
-	glm::mat4 view = ComputeViewMatrix(scene.camera);
+	glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 500.0f);
+	glm::mat4 view = glm::mat4(1.0f);
 
 	ShaderProgram program = scene.shaderProgram;
 
@@ -64,14 +67,16 @@ void Renderer::Draw(SDL_Window* window, Scene& scene)
 	location = program.UniformLocation("model");
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
 
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (auto& mesh : scene.meshes) {
-		BindMesh(mesh);
-	}
-
-	SDL_GL_SwapWindow(window);
+	for (const auto& object : scene.objects) {
+		if (object.hasComponent<MeshComponent>()) {
+			auto meshName = object.getComponent<MeshComponent>()->meshName;
+			const Mesh& mesh = resources.meshes.at(meshName);
+			BindMesh(mesh);
+		} 
+	}	
 }
 
 void Renderer::BindMesh(const Mesh& mesh)

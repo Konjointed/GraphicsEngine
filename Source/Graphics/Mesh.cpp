@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-#include "../Core/Scene.h"
+#include "../Core/Game.h"
 
 Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
@@ -102,15 +102,41 @@ Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene)
     return processedMesh;
 }
 
-void ProcessNode(aiNode* node, const aiScene* scene, Scene& t_scene)
+std::vector<Mesh> ProcessNode(aiNode* node, const aiScene* scene)
 {
+    std::vector<Mesh> meshes;
+
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        Mesh processedMesh = ProcessMesh(mesh, scene);
-        t_scene.meshes.push_back(processedMesh);
+        aiMesh* aiMesh = scene->mMeshes[node->mMeshes[i]];
+        Mesh processedMesh = ProcessMesh(aiMesh, scene);
+        meshes.push_back(processedMesh);
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        ProcessNode(node->mChildren[i], scene, t_scene);
+        std::vector<Mesh> childMeshes = ProcessNode(node->mChildren[i], scene);
+        meshes.insert(meshes.end(), childMeshes.begin(), childMeshes.end());
+    }
+
+    return meshes;
+}
+
+void LoadMesh(Resources& resources, const std::string& filepath, const std::string& name)
+{
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(filepath,
+        aiProcess_Triangulate |
+        aiProcess_GenSmoothNormals |
+        aiProcess_CalcTangentSpace);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+        return;
+    }
+
+    std::vector<Mesh> meshes = ProcessNode(scene->mRootNode, scene);
+
+    for (size_t i = 0; i < meshes.size(); i++) {
+        std::string meshName = name + "_" + std::to_string(i);
+        resources.meshes[name] = meshes[i];
     }
 }

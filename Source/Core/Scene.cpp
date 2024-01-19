@@ -1,31 +1,28 @@
 #include "Scene.h"
+#include "GameObject.h"
+#include "Components.h"
+#include "Game.h"
 
-#include <iostream>
+GameObject& Scene::CreateGameObject(const std::string& name) {
+    GameObject object;
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+    object.addComponent(TransformComponent{});
+    object.addComponent(TagComponent{});
+    object.getComponent<TagComponent>()->tag = name;
 
-void InitScene(Scene& scene)
-{
-    scene.camera.behavior = std::make_unique<DebugCameraBehavior>();
+    objects.push_back(std::move(object)); // Use move semantics to avoid copying
 
-    scene.shaderProgram.AddShaders(GL_VERTEX_SHADER, "Resources/Shaders/Default.vert", GL_FRAGMENT_SHADER, "Resources/Shaders/Default.frag");
-    scene.shaderProgram.Link();
+    return objects.back(); // Return a reference to the newly added object
 }
 
-void LoadMesh(const std::string& filepath, Scene& t_scene)
-{
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filepath,
-        aiProcess_Triangulate |
-        aiProcess_GenSmoothNormals |
-        aiProcess_CalcTangentSpace);
+void Scene::DestroyGameObject(GameObject object) {
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-        return;
-    }
+}
 
-    ProcessNode(scene->mRootNode, scene, t_scene);
+void CreateScene(Scene& scene) {
+	scene.shaderProgram.AddShaders(GL_VERTEX_SHADER, "Resources/Shaders/Default.vert", GL_FRAGMENT_SHADER, "Resources/Shaders/Default.frag");
+	scene.shaderProgram.Link();
+
+    GameObject& object = scene.CreateGameObject("Suzanne");
+    object.addComponent(MeshComponent{ "cube" });
 }

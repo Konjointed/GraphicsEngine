@@ -9,7 +9,7 @@
 
 #include <glm/glm.hpp>
 
-class Scene;
+struct Resources;
 
 struct Vertex {
 	glm::vec3 position;
@@ -22,10 +22,11 @@ struct Vertex {
 };
 
 struct Mesh {
+	unsigned int vao, vbo, ebo;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	unsigned int vao, vbo, ebo;
 };
 
 Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-void ProcessNode(aiNode* node, const aiScene* scene, Scene& t_scene);
+std::vector<Mesh> ProcessNode(aiNode* node, const aiScene* scene);
+void LoadMesh(Resources& resources, const std::string& filepath, const std::string& name);
