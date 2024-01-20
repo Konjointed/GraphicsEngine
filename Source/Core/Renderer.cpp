@@ -11,11 +11,16 @@
 #include "Game.h"
 #include "Components.h"
 
-void Renderer::Draw(const Scene& scene, const Resources& resources)
+void Renderer::Draw(const Scene& scene, EntityManager& entityManager, const Resources& resources)
 {
+	Entity cameraEntity = scene.camera;
+	CameraComponent& cameraComp = entityManager.getComponent<CameraComponent>(cameraEntity);
+	TransformComponent& transformComp = entityManager.getComponent<TransformComponent>(cameraEntity);
+
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), 1280.0f / 720.0f, 0.1f, 500.0f);
-	glm::mat4 view = glm::mat4(1.0f);
+	//glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 view = glm::lookAt(transformComp.translation, transformComp.translation + cameraComp.forward, cameraComp.up);
 
 	ShaderProgram program = scene.shaderProgram;
 
@@ -69,7 +74,6 @@ void Renderer::Draw(const Scene& scene, const Resources& resources)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (const MeshComponent& mesh : meshes) {
-		std::cout << mesh.meshName << "\n";
 		BindMesh(resources.meshes.at(mesh.meshName));
 	}
 

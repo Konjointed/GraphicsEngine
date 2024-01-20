@@ -1,10 +1,10 @@
 #pragma once
 
-class ECS;
+class EntityManager;
 struct Scene;
 
 class Simulation {
 public:
-	Simulation(Scene& scene, ECS& ecs);
+	Simulation(Scene& scene, EntityManager& entityManager);
 	void Update(float timestep);
 };

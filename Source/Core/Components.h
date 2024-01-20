@@ -6,18 +6,20 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Graphics/Mesh.h"
+struct Component {
+    virtual ~Component() = default;
 
-struct TagComponent {
     int entity;
+};
+
+struct TagComponent : Component {
     std::string tag;
 
     TagComponent() = default;
     TagComponent(const std::string& tag) : tag(tag) {}
 };
 
-struct TransformComponent {
-    int entity;
+struct TransformComponent : Component {
     glm::vec3 translation;
     glm::vec3 rotation;
     glm::vec3 scale;
@@ -29,10 +31,27 @@ struct TransformComponent {
         : translation(translation), rotation(rotation), scale(scale) {}
 };
 
-struct MeshComponent {
-    int entity;
+struct MeshComponent : Component {
     std::string meshName;
 
     MeshComponent() = default;
     MeshComponent(const std::string& meshName) : meshName(meshName) {}
+};
+
+struct CameraComponent : Component {
+    glm::vec3 forward;
+    glm::vec3 right;
+    glm::vec3 up;
+
+    float yaw;
+    float pitch;
+    float roll;
+
+    float fov;
+    float aspectRatio;
+    float nearPlane;
+    float farPlane;
+
+    CameraComponent() : forward(glm::vec3(0.0f, 0.0f, -1.0f)), right(glm::vec3(1.0f, 0.0f, 0.0f)), up(glm::vec3(0.0f, 1.0f, 0.0f)),
+		yaw(0.0f), pitch(0.0f), roll(0.0f), fov(45.0f), aspectRatio(1.0f), nearPlane(0.1f), farPlane(500.0f) {}
 };

@@ -10,15 +10,16 @@
 
 #include "../Graphics/Mesh.h"
 #include "../Graphics/ShaderProgram.h"
-
-#include "World.h"
+#include "EntityManager.h"
 
 class EventDispatcher;
 class Input;
 class Renderer;
 class Simulation;
 
+// TODO: Figure out what the fuck I'm doing with this
 struct Scene {
+	Entity camera;
 	ShaderProgram shaderProgram;
 };
 
@@ -57,8 +58,7 @@ private:
 	Input* input = nullptr;
 	Renderer* renderer = nullptr;
 	Simulation* simulation = nullptr;
-
-	ECS ecs;
+	EntityManager* entityManager = nullptr;
 
 	Resources resources;
 	Scene scene;

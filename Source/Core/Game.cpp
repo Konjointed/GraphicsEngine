@@ -12,6 +12,7 @@
 #include "Simulation.h"
 
 class RenderSystem;
+class CameraSystem;
 
 int Game::Run(const char* title, int width, int height, bool fullscreen)
 {
@@ -46,8 +47,8 @@ int Game::Run(const char* title, int width, int height, bool fullscreen)
 		//	totalTime = 0.0f;
 		//}	
 
-		ecs.update(timestep);
-		renderer->Draw(scene, resources);
+		entityManager->update(timestep); // TODO: Definitely move this somewhere else
+		renderer->Draw(scene, *entityManager, resources);
 		simulation->Update(timestep);
 		input->EndFrame();
 
@@ -187,12 +188,14 @@ void Game::LoadSubsystems()
 	dispatcher = new EventDispatcher();
 	input = new Input(*dispatcher);
 	renderer = new Renderer();
-	simulation = new Simulation(scene, ecs);
+	entityManager = new EntityManager(*input);
+	simulation = new Simulation(scene, *entityManager);
 }
 
 void Game::LoadECSSystems()
 {
-	ecs.registerSystem<RenderSystem>(*renderer);
+	entityManager->registerSystem<RenderSystem>(*renderer);
+	entityManager->registerSystem<CameraSystem>();
 }
 
 void Game::LoadResources(Resources& resources)

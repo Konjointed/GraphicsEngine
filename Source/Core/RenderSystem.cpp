@@ -1,11 +1,11 @@
 #include "RenderSystem.h"
-#include "World.h"
+#include "EntityManager.h"
 #include "Renderer.h"
 
-void RenderSystem::update(ECS& ecs, float timestep) {
-	for (auto& entity : ecs.queryEntitiesWith<MeshComponent, TransformComponent>()) {
-		MeshComponent& mesh = ecs.getComponent<MeshComponent>(entity);
-		TransformComponent& transform = ecs.getComponent<TransformComponent>(entity);
+void RenderSystem::update(EntityManager& entityManager, float timestep) {
+	for (auto& entity : entityManager.queryEntitiesWith<MeshComponent, TransformComponent>()) {
+		MeshComponent& mesh = entityManager.getComponent<MeshComponent>(entity);
+		TransformComponent& transform = entityManager.getComponent<TransformComponent>(entity);
 
 		renderer.SubmitMesh(mesh);
 	}
