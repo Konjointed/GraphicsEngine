@@ -21,6 +21,7 @@ class Simulation;
 struct Scene {
 	Entity camera;
 	ShaderProgram shaderProgram;
+	//EntityManager entityManager;
 };
 
 struct Resources {
