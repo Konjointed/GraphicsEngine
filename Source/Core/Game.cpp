@@ -10,6 +10,8 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Simulation.h"
+//#include "EntityManager.h"
+#include "RenderingPipeline.h"
 
 class RenderSystem;
 class CameraSystem;
@@ -47,9 +49,12 @@ int Game::Run(const char* title, int width, int height, bool fullscreen)
 		//	totalTime = 0.0f;
 		//}	
 
-		entityManager->update(timestep); // TODO: Definitely move this somewhere else
 		renderer->Draw(scene, *entityManager, resources);
 		simulation->Update(timestep);
+
+		entityManager->update(timestep);
+		entityManager->render(GEOMETRY_PASS);
+
 		input->EndFrame();
 
 		SDL_GL_SwapWindow(window);
@@ -82,6 +87,9 @@ void Game::Shutdown()
 	delete dispatcher;
 	delete input;
 	delete renderer;
+	delete simulation;
+	delete entityManager;
+	delete pipeline;
 }
 
 void Game::SDL2ProcessEvent(SDL_Event& event)
@@ -185,17 +193,19 @@ bool Game::LoadSDL(const char* title, int width, int height, bool fullscreen)
 
 void Game::LoadSubsystems()
 {
+	//pipeline = new RenderingPipeline();
+	entityManager = new EntityManager();
 	dispatcher = new EventDispatcher();
 	input = new Input(*dispatcher);
 	renderer = new Renderer();
-	entityManager = new EntityManager(*input);
 	simulation = new Simulation(scene, *entityManager);
 }
 
 void Game::LoadECSSystems()
-{
-	entityManager->registerSystem<RenderSystem>(*renderer);
+{	
 	entityManager->registerSystem<CameraSystem>();
+
+	entityManager->registerRenderSystem<RenderSystem>(GEOMETRY_PASS);
 }
 
 void Game::LoadResources(Resources& resources)

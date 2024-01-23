@@ -8,6 +8,17 @@ void EntityManager::update(float timestep) {
 	}
 }
 
+void EntityManager::render(RenderStage stage)
+{
+    auto systems = renderSystems.find(stage);
+
+    if (systems != renderSystems.end()) {
+        for (IRenderSystem* system : systems->second) {
+            system->render(*this);
+        }
+    }
+}
+
 Entity EntityManager::createEntity(const std::string& name) {
 	Entity entity{ nextEntityId++ };
 	entities.insert(entity);

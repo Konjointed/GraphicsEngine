@@ -16,6 +16,8 @@ class EventDispatcher;
 class Input;
 class Renderer;
 class Simulation;
+class RenderingPipeline;
+//class EntityManager;
 
 // TODO: Figure out what the fuck I'm doing with this
 struct Scene {
@@ -36,10 +38,13 @@ public:
 		return instance;
 	}
 
-	Game(const Game&) = delete; 
+	Game(const Game&) = delete;
 	Game& operator=(const Game&) = delete; 
 
 	int Run(const char* title, int width, int height, bool fullscreen);
+
+	Resources& getResources() { return resources; }
+	Input& getInput() { return *input; }
 private:
 	Game() = default;
 	bool Init(const char* title, int width, int height, bool fullscreen);
@@ -59,6 +64,7 @@ private:
 	Input* input = nullptr;
 	Renderer* renderer = nullptr;
 	Simulation* simulation = nullptr;
+	RenderingPipeline* pipeline = nullptr;
 	EntityManager* entityManager = nullptr;
 
 	Resources resources;

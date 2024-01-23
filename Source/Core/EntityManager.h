@@ -1,18 +1,18 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <typeindex>
 
-#include "ISystem.h"
-#include "Components.h"
+#include "Systems/ISystem.h"
+#include "Systems/IRenderSystem.h"
+#include "Systems/RenderSystem.h"
+#include "Systems/CameraSystem.h"
+#include "Components/Components.h"
+
 #include "Entity.h"
-
-#include "RenderSystem.h"
-#include "CameraSystem.h"
-
-class Input;
 
 // According to ChatGPT: "Ensures that entities can quickly and uniquely identified when uses as keys in has-based containers"
 namespace std {
@@ -26,13 +26,16 @@ namespace std {
 
 class EntityManager {
 public:
-	// TODO: Register systems in the constructor?
-	EntityManager(Input& input) : input(input) {}
-
 	template <typename SystemType, typename... Args>
 	void registerSystem(Args&&... args) {
 		SystemType* system = new SystemType(std::forward<Args>(args)...);
 		systems.push_back(system);
+	}
+
+	template <typename RenderSystemType, typename... Args>
+	void registerRenderSystem(RenderStage stage, Args&&... args) {
+		RenderSystemType* renderSystem = new RenderSystemType(std::forward<Args>(args)...);
+		renderSystems[stage].push_back(renderSystem);
 	}
 
 	template <typename T>
@@ -68,12 +71,11 @@ public:
 	}
 
 	void update(float timestep);
+	void render(RenderStage stage);
 
 	Entity createEntity(const std::string& name);
 	void destroyEntity(Entity entity);
 	bool alive(Entity entity);
-
-	Input& getInput() { return input; }
 private:
 	template <typename... ComponentTypes>
 	bool hasComponents(Entity entity) {
@@ -82,9 +84,8 @@ private:
 private:
 	int nextEntityId = 0;
 
-	Input& input;
-
 	std::vector<ISystem*> systems;
+	std::map<RenderStage, std::vector<IRenderSystem*>> renderSystems;
 	std::unordered_set<Entity> entities;
 	std::unordered_map<Entity, std::unordered_map<std::type_index, Component*>> components;
 };
